@@ -1,0 +1,767 @@
+(kicad_sch
+	(version 20250114)
+	(generator "eeschema")
+	(generator_version "9.0")
+	(uuid "dbe148c7-69e3-47bf-a35a-74860e697aa9")
+	(paper "A4")
+	(title_block
+		(title "CascaVibe - ESP32 + MPU-6050")
+		(date "2026-09-09")
+		(rev "1.0")
+		(company "CascaVibe")
+		(comment 1 "Montagem de bancada / interface funcional")
+	)
+	(lib_symbols
+		(symbol "CascaVibe:ESP32_Interface"
+			(pin_numbers
+				(hide yes)
+			)
+			(pin_names
+				(offset 0.762)
+			)
+			(exclude_from_sim no)
+			(in_bom yes)
+			(on_board no)
+			(property "Reference" "U"
+				(at 0 30.48 0)
+				(effects
+					(font
+						(size 1.27 1.27)
+					)
+				)
+			)
+			(property "Value" "ESP32 - interface funcional"
+				(at 0 27.94 0)
+				(effects
+					(font
+						(size 1.27 1.27)
+					)
+				)
+			)
+			(property "Footprint" ""
+				(at 0 0 0)
+				(effects
+					(font
+						(size 1.27 1.27)
+					)
+					(hide yes)
+				)
+			)
+			(property "Datasheet" ""
+				(at 0 0 0)
+				(effects
+					(font
+						(size 1.27 1.27)
+					)
+					(hide yes)
+				)
+			)
+			(property "Description" ""
+				(at 0 0 0)
+				(effects
+					(font
+						(size 1.27 1.27)
+					)
+					(hide yes)
+				)
+			)
+			(symbol "ESP32_Interface_0_1"
+				(rectangle
+					(start -20.32 25.4)
+					(end 20.32 -25.4)
+					(stroke
+						(width 0.254)
+						(type default)
+					)
+					(fill
+						(type background)
+					)
+				)
+			)
+			(symbol "ESP32_Interface_1_1"
+				(pin power_out line
+					(at 25.4 17.78 180)
+					(length 5.08)
+					(name "3V3"
+						(effects
+							(font
+								(size 1.27 1.27)
+							)
+						)
+					)
+					(number "3V3"
+						(effects
+							(font
+								(size 1.27 1.27)
+							)
+						)
+					)
+				)
+				(pin output line
+					(at 25.4 5.08 180)
+					(length 5.08)
+					(name "GPIO22"
+						(effects
+							(font
+								(size 1.27 1.27)
+							)
+						)
+					)
+					(number "GPIO22"
+						(effects
+							(font
+								(size 1.27 1.27)
+							)
+						)
+					)
+				)
+				(pin bidirectional line
+					(at 25.4 -7.62 180)
+					(length 5.08)
+					(name "GPIO21"
+						(effects
+							(font
+								(size 1.27 1.27)
+							)
+						)
+					)
+					(number "GPIO21"
+						(effects
+							(font
+								(size 1.27 1.27)
+							)
+						)
+					)
+				)
+				(pin power_out line
+					(at 25.4 -20.32 180)
+					(length 5.08)
+					(name "GND"
+						(effects
+							(font
+								(size 1.27 1.27)
+							)
+						)
+					)
+					(number "GND"
+						(effects
+							(font
+								(size 1.27 1.27)
+							)
+						)
+					)
+				)
+			)
+			(embedded_fonts no)
+		)
+		(symbol "CascaVibe:GY521_Module"
+			(pin_numbers
+				(hide yes)
+			)
+			(pin_names
+				(offset 0.762)
+			)
+			(exclude_from_sim no)
+			(in_bom yes)
+			(on_board no)
+			(property "Reference" "U"
+				(at 0 30.48 0)
+				(effects
+					(font
+						(size 1.27 1.27)
+					)
+				)
+			)
+			(property "Value" "GY-521 / MPU-6050"
+				(at 0 27.94 0)
+				(effects
+					(font
+						(size 1.27 1.27)
+					)
+				)
+			)
+			(property "Footprint" ""
+				(at 0 0 0)
+				(effects
+					(font
+						(size 1.27 1.27)
+					)
+					(hide yes)
+				)
+			)
+			(property "Datasheet" ""
+				(at 0 0 0)
+				(effects
+					(font
+						(size 1.27 1.27)
+					)
+					(hide yes)
+				)
+			)
+			(property "Description" ""
+				(at 0 0 0)
+				(effects
+					(font
+						(size 1.27 1.27)
+					)
+					(hide yes)
+				)
+			)
+			(symbol "GY521_Module_0_1"
+				(rectangle
+					(start -20.32 25.4)
+					(end 20.32 -25.4)
+					(stroke
+						(width 0.254)
+						(type default)
+					)
+					(fill
+						(type background)
+					)
+				)
+			)
+			(symbol "GY521_Module_1_1"
+				(pin power_in line
+					(at -25.4 17.78 0)
+					(length 5.08)
+					(name "VCC"
+						(effects
+							(font
+								(size 1.27 1.27)
+							)
+						)
+					)
+					(number "VCC"
+						(effects
+							(font
+								(size 1.27 1.27)
+							)
+						)
+					)
+				)
+				(pin input line
+					(at -25.4 5.08 0)
+					(length 5.08)
+					(name "SCL"
+						(effects
+							(font
+								(size 1.27 1.27)
+							)
+						)
+					)
+					(number "SCL"
+						(effects
+							(font
+								(size 1.27 1.27)
+							)
+						)
+					)
+				)
+				(pin bidirectional line
+					(at -25.4 -7.62 0)
+					(length 5.08)
+					(name "SDA"
+						(effects
+							(font
+								(size 1.27 1.27)
+							)
+						)
+					)
+					(number "SDA"
+						(effects
+							(font
+								(size 1.27 1.27)
+							)
+						)
+					)
+				)
+				(pin power_in line
+					(at -25.4 -20.32 0)
+					(length 5.08)
+					(name "GND"
+						(effects
+							(font
+								(size 1.27 1.27)
+							)
+						)
+					)
+					(number "GND"
+						(effects
+							(font
+								(size 1.27 1.27)
+							)
+						)
+					)
+				)
+				(pin bidirectional line
+					(at 25.4 17.78 180)
+					(length 5.08)
+					(name "XDA"
+						(effects
+							(font
+								(size 1.27 1.27)
+							)
+						)
+					)
+					(number "XDA"
+						(effects
+							(font
+								(size 1.27 1.27)
+							)
+						)
+					)
+				)
+				(pin output line
+					(at 25.4 5.08 180)
+					(length 5.08)
+					(name "XCL"
+						(effects
+							(font
+								(size 1.27 1.27)
+							)
+						)
+					)
+					(number "XCL"
+						(effects
+							(font
+								(size 1.27 1.27)
+							)
+						)
+					)
+				)
+				(pin output line
+					(at 25.4 -7.62 180)
+					(length 5.08)
+					(name "INT"
+						(effects
+							(font
+								(size 1.27 1.27)
+							)
+						)
+					)
+					(number "INT"
+						(effects
+							(font
+								(size 1.27 1.27)
+							)
+						)
+					)
+				)
+				(pin input line
+					(at 25.4 -20.32 180)
+					(length 5.08)
+					(name "AD0"
+						(effects
+							(font
+								(size 1.27 1.27)
+							)
+						)
+					)
+					(number "AD0"
+						(effects
+							(font
+								(size 1.27 1.27)
+							)
+						)
+					)
+				)
+			)
+			(embedded_fonts no)
+		)
+	)
+	(text "NOTAS DE MONTAGEM"
+		(exclude_from_sim no)
+		(at 195.58 135.89 0)
+		(effects
+			(font
+				(size 1.524 1.524)
+			)
+			(justify left top)
+		)
+		(uuid "04c9cc69-c8ee-4a17-b7b6-10adcd32a96b")
+	)
+	(text "CASCAVIBE  |  INTERFACE DE MOVIMENTO"
+		(exclude_from_sim no)
+		(at 22.86 20.32 0)
+		(effects
+			(font
+				(size 3.048 3.048)
+			)
+			(justify left top)
+		)
+		(uuid "0b963be0-e713-47e5-836a-0d5363235023")
+	)
+	(text "AD0 = GND\nEndereço: 0x68"
+		(exclude_from_sim no)
+		(at 238.76 113.03 0)
+		(effects
+			(font
+				(size 1.27 1.27)
+			)
+			(justify left top)
+		)
+		(uuid "4c1f19a3-0bfd-4111-809f-12583e172670")
+	)
+	(text "03  SENSOR INERCIAL"
+		(exclude_from_sim no)
+		(at 185.42 40.64 0)
+		(effects
+			(font
+				(size 1.778 1.778)
+			)
+			(justify left top)
+		)
+		(uuid "4dcc284a-59d3-42f6-ad44-ce716d69c153")
+	)
+	(text "XDA / XCL / INT: sem conexão"
+		(exclude_from_sim no)
+		(at 190.5 124.46 0)
+		(effects
+			(font
+				(size 1.27 1.27)
+			)
+			(justify left top)
+		)
+		(uuid "67147bdb-e70e-4ef8-8f92-00a1d628f72d")
+	)
+	(text "02  I2C / ALIMENTAÇÃO"
+		(exclude_from_sim no)
+		(at 107.95 40.64 0)
+		(effects
+			(font
+				(size 1.778 1.778)
+			)
+			(justify left top)
+		)
+		(uuid "76042f66-2735-4c4a-a92c-9e1ec636fb40")
+	)
+	(text "ESP32 + MPU-6050  /  Esquema de montagem com módulos prontos  /  Rev. 1.0"
+		(exclude_from_sim no)
+		(at 22.86 27.94 0)
+		(effects
+			(font
+				(size 1.524 1.524)
+			)
+			(justify left top)
+		)
+		(uuid "8f71a957-3fc7-470b-8654-f1353bcbd863")
+	)
+	(text "• Alimentar pelo USB da placa ESP32.\n• GND comum entre os dois módulos.\n• Não ligar SDA/SCL a 5 V.\n• Usar fios curtos no barramento I2C.\n• Bússola do painel é relativa:\n  MPU-6050 não tem magnetômetro."
+		(exclude_from_sim no)
+		(at 195.58 142.24 0)
+		(effects
+			(font
+				(size 1.27 1.27)
+			)
+			(justify left top)
+		)
+		(uuid "964bd304-1dd4-4799-82a7-eaa9ca36d256")
+	)
+	(text "01  CONTROLADOR + USB"
+		(exclude_from_sim no)
+		(at 30.48 40.64 0)
+		(effects
+			(font
+				(size 1.778 1.778)
+			)
+			(justify left top)
+		)
+		(uuid "9ed6bbe9-1c5c-421b-bc6d-cb118de2fb42")
+	)
+	(text "PC → USB da placa\nAlimentação + serial\n115200 baud"
+		(exclude_from_sim no)
+		(at 26.67 119.38 0)
+		(effects
+			(font
+				(size 1.27 1.27)
+			)
+			(justify left top)
+		)
+		(uuid "cd28bdd1-3ea4-4bde-b96c-f5fb7022ff51")
+	)
+	(text "SCL = GPIO22    SDA = GPIO21\nNíveis lógicos: 3,3 V"
+		(exclude_from_sim no)
+		(at 106.68 116.84 0)
+		(effects
+			(font
+				(size 1.27 1.27)
+			)
+			(justify left top)
+		)
+		(uuid "cf1cc506-22e9-411e-936c-4d2340debfc2")
+	)
+	(no_connect
+		(at 231.14 71.12)
+		(uuid "309aa1d6-ac7e-4144-a0de-23d140526f58")
+	)
+	(no_connect
+		(at 231.14 83.82)
+		(uuid "8e618d84-6d4e-4636-b26e-44bd2290172c")
+	)
+	(no_connect
+		(at 231.14 96.52)
+		(uuid "d56ba6c0-83a3-40e1-bd26-a3b425e2b8da")
+	)
+	(wire
+		(pts
+			(xy 86.36 71.12) (xy 180.34 71.12)
+		)
+		(stroke
+			(width 0)
+			(type default)
+		)
+		(uuid "081386ba-4390-4d91-97f3-adcaf1d03d86")
+	)
+	(wire
+		(pts
+			(xy 86.36 96.52) (xy 180.34 96.52)
+		)
+		(stroke
+			(width 0)
+			(type default)
+		)
+		(uuid "22cbd5f6-2565-42ca-86b9-8bf474f44801")
+	)
+	(wire
+		(pts
+			(xy 86.36 83.82) (xy 180.34 83.82)
+		)
+		(stroke
+			(width 0)
+			(type default)
+		)
+		(uuid "b577d117-637c-44cd-b15f-a1c864372ef2")
+	)
+	(wire
+		(pts
+			(xy 231.14 109.22) (xy 248.92 109.22)
+		)
+		(stroke
+			(width 0)
+			(type default)
+		)
+		(uuid "c065ba18-ed46-45c6-ba83-03a2c81df797")
+	)
+	(wire
+		(pts
+			(xy 86.36 109.22) (xy 180.34 109.22)
+		)
+		(stroke
+			(width 0)
+			(type default)
+		)
+		(uuid "f9781427-7825-4770-b65d-a0db79f7b92f")
+	)
+	(label "I2C_SCL"
+		(at 121.92 83.82 0)
+		(effects
+			(font
+				(size 1.27 1.27)
+			)
+			(justify left bottom)
+		)
+		(uuid "028acf1e-599e-4264-9e3e-d72851359296")
+	)
+	(label "GND"
+		(at 121.92 109.22 0)
+		(effects
+			(font
+				(size 1.27 1.27)
+			)
+			(justify left bottom)
+		)
+		(uuid "07e027f6-87e7-4f61-abd0-898b91706ee2")
+	)
+	(label "GND"
+		(at 248.92 109.22 0)
+		(effects
+			(font
+				(size 1.27 1.27)
+			)
+			(justify left bottom)
+		)
+		(uuid "aed749dd-ee23-4eb1-8035-8a175034cf5b")
+	)
+	(label "+3V3"
+		(at 121.92 71.12 0)
+		(effects
+			(font
+				(size 1.27 1.27)
+			)
+			(justify left bottom)
+		)
+		(uuid "afdeb3e8-c2d8-45f3-83af-961ed8625783")
+	)
+	(label "I2C_SDA"
+		(at 121.92 96.52 0)
+		(effects
+			(font
+				(size 1.27 1.27)
+			)
+			(justify left bottom)
+		)
+		(uuid "ff907ea9-8432-455e-ba0f-c927a0d5885c")
+	)
+	(symbol
+		(lib_id "CascaVibe:GY521_Module")
+		(at 205.74 88.9 0)
+		(unit 1)
+		(exclude_from_sim no)
+		(in_bom yes)
+		(on_board no)
+		(dnp no)
+		(uuid "33f76ee1-4877-481f-83ef-aea51b2a41c6")
+		(property "Reference" "U2"
+			(at 205.74 55.88 0)
+			(effects
+				(font
+					(size 1.27 1.27)
+				)
+			)
+		)
+		(property "Value" "GY-521 / MPU-6050"
+			(at 205.74 59.69 0)
+			(effects
+				(font
+					(size 1.27 1.27)
+				)
+			)
+		)
+		(property "Footprint" ""
+			(at 205.74 88.9 0)
+			(effects
+				(font
+					(size 1.27 1.27)
+				)
+				(hide yes)
+			)
+		)
+		(property "Datasheet" ""
+			(at 205.74 88.9 0)
+			(effects
+				(font
+					(size 1.27 1.27)
+				)
+				(hide yes)
+			)
+		)
+		(property "Description" ""
+			(at 205.74 88.9 0)
+			(effects
+				(font
+					(size 1.27 1.27)
+				)
+			)
+		)
+		(pin "VCC"
+			(uuid "a5ec9118-35ea-4868-ba3e-858b492a1f09")
+		)
+		(pin "SCL"
+			(uuid "ed5c673f-3a33-4db9-bd1a-66551fb63720")
+		)
+		(pin "SDA"
+			(uuid "e8a69a96-cb34-4b0f-b67b-e41a87c895ee")
+		)
+		(pin "GND"
+			(uuid "1747547c-c1df-4eb4-9331-319eb695f337")
+		)
+		(pin "XDA"
+			(uuid "f772d2fe-82e6-4200-a3d8-a205f1355413")
+		)
+		(pin "XCL"
+			(uuid "ee3a5268-ba0d-415e-af4e-7d4e9c336544")
+		)
+		(pin "INT"
+			(uuid "8487b10f-f2e6-4de5-8267-c116d6738462")
+		)
+		(pin "AD0"
+			(uuid "e30d75b6-eca5-4f6d-a6a8-426e0b792a58")
+		)
+		(instances
+			(project "CascaVibe"
+				(path "/dbe148c7-69e3-47bf-a35a-74860e697aa9"
+					(reference "U2")
+					(unit 1)
+				)
+			)
+		)
+	)
+	(symbol
+		(lib_id "CascaVibe:ESP32_Interface")
+		(at 60.96 88.9 0)
+		(unit 1)
+		(exclude_from_sim no)
+		(in_bom yes)
+		(on_board no)
+		(dnp no)
+		(uuid "81283718-08eb-4ce3-80c5-92792db27a53")
+		(property "Reference" "U1"
+			(at 60.96 55.88 0)
+			(effects
+				(font
+					(size 1.27 1.27)
+				)
+			)
+		)
+		(property "Value" "Placa ESP32-WROOM-32 / USB"
+			(at 60.96 59.69 0)
+			(effects
+				(font
+					(size 1.27 1.27)
+				)
+			)
+		)
+		(property "Footprint" ""
+			(at 60.96 88.9 0)
+			(effects
+				(font
+					(size 1.27 1.27)
+				)
+				(hide yes)
+			)
+		)
+		(property "Datasheet" ""
+			(at 60.96 88.9 0)
+			(effects
+				(font
+					(size 1.27 1.27)
+				)
+				(hide yes)
+			)
+		)
+		(property "Description" ""
+			(at 60.96 88.9 0)
+			(effects
+				(font
+					(size 1.27 1.27)
+				)
+			)
+		)
+		(pin "3V3"
+			(uuid "66729144-9d91-4974-8baf-68bff61a0440")
+		)
+		(pin "GPIO22"
+			(uuid "741e8aee-e333-4e3e-9b5d-3f2da4532970")
+		)
+		(pin "GPIO21"
+			(uuid "0cf41d6a-adb2-47e6-8423-b7d450194abe")
+		)
+		(pin "GND"
+			(uuid "1ce10fd9-b529-4828-9f13-9e28ed9c239a")
+		)
+		(instances
+			(project "CascaVibe"
+				(path "/dbe148c7-69e3-47bf-a35a-74860e697aa9"
+					(reference "U1")
+					(unit 1)
+				)
+			)
+		)
+	)
+	(sheet_instances
+		(path "/"
+			(page "1")
+		)
+	)
+	(embedded_fonts no)
+)

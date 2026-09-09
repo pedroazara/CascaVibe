@@ -1,0 +1,1 @@
+(sym_lib_table (version 7) (lib (name "CascaVibe") (type "KiCad") (uri "${KIPRJMOD}/CascaVibe.kicad_sym") (options "") (descr "Módulos funcionais e passivos do CascaVibe")))
