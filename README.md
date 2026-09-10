@@ -1,5 +1,11 @@
 # CascaVibe — laboratório de movimento
 
+## Etapa atual: acelerômetro + Wi-Fi
+
+O novo firmware está em `firmware/cascavibe_wifi/cascavibe_wifi.ino`. Ele coleta somente aceleração, oferece uma página simples para configurar Wi-Fi e envia lotes a uma API configurável. Abra `firmware/cascavibe_wifi/README.md` para gravar e conectar. O guia para você implementar sua API está em `docs/API.md`.
+
+O protótipo de horizonte abaixo permanece como experimento anterior e usa um firmware/protocolo diferente.
+
 Painel Python/Pygame para ESP32 + **MPU-6050** (módulo frequentemente chamado GY-521; aqui identificado como KY-521). Inclui horizonte artificial, bússola relativa, acelerômetro X/Y/Z, histórico de aceleração, giroscópio e temperatura do chip.
 
 **Atualização necessária:** regrave o sketch do ESP32 para receber os novos instrumentos. O firmware anterior envia apenas `ANGLE,roll,pitch`; o painel ainda o aceita, mas exibe os campos ausentes como `—` e pede a atualização.
