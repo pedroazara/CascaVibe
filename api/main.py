@@ -6,6 +6,8 @@ entra nos próximos passos.
 """
 
 import re
+from collections import deque
+from datetime import datetime, timezone
 
 from fastapi import FastAPI, Header, HTTPException
 from pydantic import BaseModel, Field, field_validator, model_validator
@@ -157,6 +159,11 @@ class LimiteDeCorpoMiddleware(BaseHTTPMiddleware):
 app = FastAPI(title="CascaVibe Telemetry API")
 app.add_middleware(LimiteDeCorpoMiddleware)
 
+# Buffer temporário só para você acompanhar o que está chegando agora.
+# Fica em RAM, some ao reiniciar o servidor — o Passo 3 troca isso por
+# persistência de verdade com idempotência.
+ultimos_lotes: deque[dict] = deque(maxlen=50)
+
 
 @app.get("/")
 async def raiz():
@@ -170,6 +177,34 @@ async def receber_lote(lote: LoteTelemetria, authorization: str | None = Header(
     if not authorization or not authorization.startswith("Bearer "):
         raise HTTPException(status_code=401, detail="Token ausente ou inválido")
 
+    def para_g(amostra: list[int]) -> list[float]:
+        return [round(c / 16384, 4) for c in amostra]
+
+    media_g = [
+        round(sum(eixo) / len(lote.samples) / 16384, 4)
+        for eixo in zip(*lote.samples)
+    ]
+
+    resumo = {
+        "recebido_em": datetime.now(timezone.utc).isoformat(),
+        "device_id": lote.device_id,
+        "batch_id": lote.batch_id,
+        "batch_seq": lote.batch_seq,
+        "segment_id": lote.segment_id,
+        "clipped_samples": lote.clipped_samples,
+        "primeira_amostra_g": para_g(lote.samples[0]),
+        "ultima_amostra_g": para_g(lote.samples[-1]),
+        "media_g_xyz": media_g,
+    }
+    ultimos_lotes.appendleft(resumo)
+    print(f"[lote recebido] {resumo}")
+
     # Passo 3 (próximo): persistir com idempotência em
     # (device_id, boot_id, batch_seq) antes de confirmar de verdade.
     return {"accepted": True, "batch_id": lote.batch_id}
+
+
+@app.get("/api/v1/telemetry/batches/recentes")
+async def listar_recentes():
+    """Lista os últimos lotes recebidos (em memória, só para debug agora)."""
+    return list(ultimos_lotes)
