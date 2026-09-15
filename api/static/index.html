@@ -1,0 +1,90 @@
+<!doctype html>
+<html lang="pt-BR">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <meta name="theme-color" content="#16181a">
+  <title>CascaVibe</title>
+  <link rel="icon" href="data:,">
+  <link rel="stylesheet" href="/painel/static/dashboard.css">
+  <script src="/painel/static/dashboard.js" defer></script>
+</head>
+<body>
+  <main>
+    <header class="topbar">
+      <a class="brand" href="/painel" aria-label="CascaVibe início"><img src="/painel/static/cascavibe-logo.svg" alt="CascaVibe" width="250" height="60"></a>
+      <div class="status" id="status" role="status"><span></span><b>Conectando</b></div>
+    </header>
+
+    <section class="controls" aria-label="Configuração da visualização">
+      <label>Dispositivo
+        <select id="device" aria-label="Dispositivo"><option value="">Carregando…</option></select>
+      </label>
+      <label class="session-control">Sessão
+        <select id="session" aria-label="Sessão de coleta"><option value="">Ao vivo</option></select>
+      </label>
+      <label>Janela
+        <select id="window" aria-label="Janela de tempo">
+          <option value="5">5 s</option>
+          <option value="10">10 s</option>
+          <option value="30" selected>30 s</option>
+          <option value="60">60 s</option>
+        </select>
+      </label>
+      <button id="pause" class="button" type="button" aria-pressed="false">Pausar</button>
+    </section>
+
+    <section class="metrics" aria-label="Resumo do sinal">
+      <article class="metric" title="RMS da resultante XYZ, com a média removida por trecho.">
+        <span class="metric-label">RMS</span>
+        <div class="metric-value"><strong id="rms">—</strong><span class="unit-label">m/s²</span></div>
+      </article>
+      <article class="metric" title="Maior resultante XYZ, com a média removida por trecho.">
+        <span class="metric-label">Pico</span>
+        <div class="metric-value"><strong id="peak">—</strong><span class="unit-label">m/s²</span></div>
+      </article>
+      <article class="metric">
+        <span class="metric-label">Amostras</span>
+        <div class="metric-value"><strong id="samples">—</strong></div>
+      </article>
+      <article class="metric" title="Taxa nominal configurada no sensor.">
+        <span class="metric-label">Amostragem</span>
+        <div class="metric-value"><strong id="rate">—</strong><span>Hz</span></div>
+      </article>
+    </section>
+
+    <section class="chart-card" aria-label="Série temporal de vibração">
+      <div class="chart-header">
+        <h1>Aceleração</h1>
+        <div class="chart-actions">
+          <label class="sr-only" for="mode">Tratamento do sinal</label>
+          <select id="mode" title="Sem média: destaca as oscilações. Original: inclui gravidade e offset.">
+            <option value="ac">Sem média</option>
+            <option value="raw">Original</option>
+          </select>
+          <div class="unit-toggle" aria-label="Unidade">
+            <button type="button" data-unit="ms2" aria-pressed="true">m/s²</button>
+            <button type="button" data-unit="g" aria-pressed="false">g</button>
+          </div>
+          <button id="export" type="button" class="button" disabled>Exportar CSV</button>
+        </div>
+      </div>
+      <div class="axis-toggles">
+        <label class="axis-x"><input type="checkbox" data-axis="0" aria-label="Eixo X" checked> X</label>
+        <label class="axis-y"><input type="checkbox" data-axis="1" aria-label="Eixo Y" checked> Y</label>
+        <label class="axis-z"><input type="checkbox" data-axis="2" aria-label="Eixo Z" checked> Z</label>
+      </div>
+      <div class="plot-wrap" id="plot-wrap">
+        <canvas id="plot" role="img" aria-label="Gráfico de aceleração dos eixos X, Y e Z"></canvas>
+        <div class="empty-state" id="empty"><h3>Carregando…</h3><p></p></div>
+        <div id="tooltip" hidden></div>
+      </div>
+      <div class="chart-bottom">
+        <span id="time-caption" title="Horários aproximados a partir do recebimento e dos intervalos do sensor.">Horário estimado</span>
+        <span>Último dado <strong id="received">—</strong></span>
+      </div>
+    </section>
+    <div class="notice" id="notice" role="status" hidden></div>
+  </main>
+</body>
+</html>

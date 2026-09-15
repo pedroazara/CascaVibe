@@ -1,20 +1,28 @@
-"""CascaVibe — API de ingestão de telemetria (esqueleto, Passo 1).
+"""CascaVibe — API de ingestão de telemetria.
 
-Valida o contrato do firmware 0.2.0 (ver docs/API.md) e responde o ACK
-esperado pelo ESP32. Ainda sem autenticação real nem persistência — isso
-entra nos próximos passos.
+Valida o contrato do firmware 0.2.0 (ver docs/API.md), autentica por token,
+persiste com idempotência em SQLite e responde o ACK esperado pelo ESP32.
 """
 
+import json
+import os
 import re
-from collections import deque
+import sqlite3
 from datetime import datetime, timezone
+from pathlib import Path
 
 from fastapi import FastAPI, Header, HTTPException
 from pydantic import BaseModel, Field, field_validator, model_validator
 from starlette.middleware.base import BaseHTTPMiddleware
 from starlette.responses import JSONResponse
 
+if __package__:
+    from .dashboard import criar_router
+else:
+    from dashboard import criar_router
+
 MAX_BODY_BYTES = 32 * 1024
+DB_PATH = Path(os.environ.get("CASCAVIBE_DB_PATH", Path(__file__).parent / "cascavibe.db"))
 
 DEVICE_ID_RE = re.compile(r"^cv-[0-9a-f]{12}$")
 BOOT_ID_RE = re.compile(r"^[0-9a-f]{32}$")
@@ -158,11 +166,57 @@ class LimiteDeCorpoMiddleware(BaseHTTPMiddleware):
 
 app = FastAPI(title="CascaVibe Telemetry API")
 app.add_middleware(LimiteDeCorpoMiddleware)
+app.include_router(criar_router(DB_PATH))
 
-# Buffer temporário só para você acompanhar o que está chegando agora.
-# Fica em RAM, some ao reiniciar o servidor — o Passo 3 troca isso por
-# persistência de verdade com idempotência.
-ultimos_lotes: deque[dict] = deque(maxlen=50)
+# Passo 2: registro provisório de tokens autorizados por dispositivo.
+# token -> device_id. Adicione aqui o device_id real do seu ESP32 (aparece
+# no rodapé do painel ou no Serial Monitor no boot) e o token que você
+# configurou na seção "API" do painel. Isso ainda vive em código porque
+# cadastrar dispositivos via banco/admin fica para uma iteração futura.
+TOKENS_AUTORIZADOS: dict[str, str] = {
+    "TOKEN_TESTE": "cv-0123456789ab",  # usado nos testes com lote-sintetico.json
+    "cascavibe": "cv-f0e4480b65f4",
+}
+
+# Conexão única e compartilhada com o SQLite local. check_same_thread=False
+# porque o FastAPI pode chamar a partir de threads diferentes; como o volume
+# é baixo (poucos ESP32s, ~1 lote/s cada), uma conexão simples basta.
+conexao = sqlite3.connect(DB_PATH, check_same_thread=False)
+conexao.execute(
+    """
+    CREATE TABLE IF NOT EXISTS batches (
+        batch_id TEXT PRIMARY KEY,
+        device_id TEXT NOT NULL,
+        boot_id TEXT NOT NULL,
+        batch_seq INTEGER NOT NULL,
+        segment_id INTEGER NOT NULL,
+        clipped_samples INTEGER NOT NULL,
+        primeira_amostra_g TEXT NOT NULL,
+        ultima_amostra_g TEXT NOT NULL,
+        media_g_xyz TEXT NOT NULL,
+        payload_json TEXT NOT NULL,
+        recebido_em TEXT NOT NULL
+    )
+    """
+)
+conexao.commit()
+
+conexao.execute(
+    "CREATE INDEX IF NOT EXISTS batches_device_boot_seq "
+    "ON batches(device_id, boot_id, batch_seq)"
+)
+conexao.execute(
+    """
+    CREATE TABLE IF NOT EXISTS features (
+        batch_id TEXT PRIMARY KEY REFERENCES batches(batch_id),
+        rms_x REAL NOT NULL,
+        rms_y REAL NOT NULL,
+        rms_z REAL NOT NULL,
+        rms_total REAL NOT NULL
+    )
+    """
+)
+conexao.commit()
 
 
 @app.get("/")
@@ -170,41 +224,104 @@ async def raiz():
     return {"status": "ok", "service": "cascavibe-telemetry-api"}
 
 
-@app.post("/api/v1/telemetry/batches", status_code=201)
+def para_g(amostra: list[int]) -> list[float]:
+    return [round(c / 16384, 4) for c in amostra]
+
+
+def calcular_rms_ac(lote: LoteTelemetria) -> dict[str, float]:
+    """RMS por eixo após remover a média do lote (componente contínua/gravidade),
+    em m/s² — mesma abordagem que o próprio painel do ESP32 usa como indicador local
+    (ver docs/API.md, seção 8)."""
+    n = len(lote.samples)
+    escala = lote.scale_m_s2_per_count
+    rms_por_eixo = []
+    for eixo in zip(*lote.samples):
+        media = sum(eixo) / n
+        rms_contagem = (sum((c - media) ** 2 for c in eixo) / n) ** 0.5
+        rms_por_eixo.append(rms_contagem * escala)
+    rms_x, rms_y, rms_z = rms_por_eixo
+    return {
+        "rms_x": rms_x, "rms_y": rms_y, "rms_z": rms_z,
+        "rms_total": (rms_x**2 + rms_y**2 + rms_z**2) ** 0.5,
+    }
+
+
+@app.post("/api/v1/telemetry/batches")
 async def receber_lote(lote: LoteTelemetria, authorization: str | None = Header(default=None)):
-    # Passo 2 (próximo): validar o token contra o device_id em vez de só
-    # exigir a presença do header.
     if not authorization or not authorization.startswith("Bearer "):
         raise HTTPException(status_code=401, detail="Token ausente ou inválido")
-
-    def para_g(amostra: list[int]) -> list[float]:
-        return [round(c / 16384, 4) for c in amostra]
+    token = authorization.removeprefix("Bearer ").strip()
+    device_do_token = TOKENS_AUTORIZADOS.get(token)
+    if device_do_token is None:
+        raise HTTPException(status_code=401, detail="Token inválido")
+    if device_do_token != lote.device_id:
+        raise HTTPException(status_code=403, detail="Token não autorizado para este device_id")
 
     media_g = [
         round(sum(eixo) / len(lote.samples) / 16384, 4)
         for eixo in zip(*lote.samples)
     ]
+    payload_json = lote.model_dump_json()
 
-    resumo = {
-        "recebido_em": datetime.now(timezone.utc).isoformat(),
-        "device_id": lote.device_id,
-        "batch_id": lote.batch_id,
-        "batch_seq": lote.batch_seq,
-        "segment_id": lote.segment_id,
-        "clipped_samples": lote.clipped_samples,
-        "primeira_amostra_g": para_g(lote.samples[0]),
-        "ultima_amostra_g": para_g(lote.samples[-1]),
-        "media_g_xyz": media_g,
-    }
-    ultimos_lotes.appendleft(resumo)
-    print(f"[lote recebido] {resumo}")
+    try:
+        conexao.execute(
+            """
+            INSERT INTO batches
+                (batch_id, device_id, boot_id, batch_seq, segment_id, clipped_samples,
+                 primeira_amostra_g, ultima_amostra_g, media_g_xyz, payload_json, recebido_em)
+            VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)
+            """,
+            (
+                lote.batch_id, lote.device_id, lote.boot_id, lote.batch_seq, lote.segment_id,
+                lote.clipped_samples, json.dumps(para_g(lote.samples[0])),
+                json.dumps(para_g(lote.samples[-1])), json.dumps(media_g), payload_json,
+                datetime.now(timezone.utc).isoformat(),
+            ),
+        )
+        rms = calcular_rms_ac(lote)
+        conexao.execute(
+            "INSERT INTO features (batch_id, rms_x, rms_y, rms_z, rms_total) "
+            "VALUES (?, ?, ?, ?, ?)",
+            (lote.batch_id, rms["rms_x"], rms["rms_y"], rms["rms_z"], rms["rms_total"]),
+        )
+        conexao.commit()
+    except sqlite3.IntegrityError:
+        # batch_id já existe: a constraint única pegou, inclusive em corrida
+        # entre duas requisições concorrentes com o mesmo lote.
+        linha = conexao.execute(
+            "SELECT payload_json FROM batches WHERE batch_id = ?", (lote.batch_id,)
+        ).fetchone()
+        if linha is not None and linha[0] == payload_json:
+            print(f"[lote repetido, idêntico] {lote.batch_id}")
+            return JSONResponse({"accepted": True, "batch_id": lote.batch_id}, status_code=200)
+        print(f"[lote repetido, CONTEÚDO DIVERGENTE] {lote.batch_id}")
+        raise HTTPException(status_code=409, detail="batch_id já existe com conteúdo diferente")
 
-    # Passo 3 (próximo): persistir com idempotência em
-    # (device_id, boot_id, batch_seq) antes de confirmar de verdade.
-    return {"accepted": True, "batch_id": lote.batch_id}
+    print(f"[lote novo] {lote.batch_id} device={lote.device_id} media_g={media_g}")
+    return JSONResponse({"accepted": True, "batch_id": lote.batch_id}, status_code=201)
 
 
 @app.get("/api/v1/telemetry/batches/recentes")
-async def listar_recentes():
-    """Lista os últimos lotes recebidos (em memória, só para debug agora)."""
-    return list(ultimos_lotes)
+async def listar_recentes(limite: int = 50):
+    """Lista os últimos lotes persistidos no SQLite, mais recente primeiro."""
+    linhas = conexao.execute(
+        """
+        SELECT b.batch_id, b.device_id, b.batch_seq, b.segment_id, b.clipped_samples,
+               b.primeira_amostra_g, b.ultima_amostra_g, b.media_g_xyz, b.recebido_em,
+               f.rms_x, f.rms_y, f.rms_z, f.rms_total
+        FROM batches b LEFT JOIN features f ON f.batch_id = b.batch_id
+        ORDER BY b.recebido_em DESC LIMIT ?
+        """,
+        (limite,),
+    ).fetchall()
+    campos = [
+        "batch_id", "device_id", "batch_seq", "segment_id", "clipped_samples",
+        "primeira_amostra_g", "ultima_amostra_g", "media_g_xyz", "recebido_em",
+        "rms_x", "rms_y", "rms_z", "rms_total",
+    ]
+    json_fields = {"primeira_amostra_g", "ultima_amostra_g", "media_g_xyz"}
+    return [
+        {campo: (json.loads(valor) if campo in json_fields and valor is not None else valor)
+         for campo, valor in zip(campos, linha)}
+        for linha in linhas
+    ]

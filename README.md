@@ -1,5 +1,40 @@
 # CascaVibe — laboratório de movimento
 
+## Painel web de vibrações
+
+Abra **[http://127.0.0.1:8000/painel](http://127.0.0.1:8000/painel)** para visualizar as amostras do ESP32 armazenadas em `api/cascavibe.db`.
+
+Para iniciar o servidor, execute na raiz do projeto:
+
+```bash
+python3 -m venv api/.venv
+api/.venv/bin/python -m pip install -r api/requirements.txt
+api/.venv/bin/python -m uvicorn api.main:app --host 0.0.0.0 --port 8000 --reload
+```
+
+Se a API já estiver rodando com `--reload`, o painel fica disponível no mesmo servidor. Em outro computador da rede, substitua `127.0.0.1` pelo IP do computador que executa a API. O ESP32 continua enviando para `POST /api/v1/telemetry/batches`, com o token e dispositivo cadastrados na API.
+
+- Série temporal ao vivo com atualização a cada segundo, deslocamento animado e pausa da visualização.
+- Seleção de dispositivo, linha temporal de 5, 10, 30 ou 60 segundos (30 por padrão) e consulta individual às últimas 100 sessões. “Série temporal · ao vivo” mantém o histórico entre boots, sem limpar a curva a cada reinício.
+- Curvas X/Y/Z, eixos selecionáveis, valores ao passar o mouse, unidades g ou m/s² e exportação CSV da janela e tratamento exibidos.
+- Modo **Vibração · sem média** subtrai a média de cada trecho contínuo. **Aceleração original** preserva gravidade e offset. A remoção da média não é uma compensação completa da gravidade durante movimentos.
+- RMS e pico são calculados sobre a resultante XYZ com a média removida por trecho, independentemente do modo e dos eixos visíveis. RMS = raiz da média de (X² + Y² + Z²); pico = maior raiz de (X² + Y² + Z²).
+- Reinícios, mudanças de segmento, lotes ausentes, descontinuidade dos índices ou do tempo interrompem as curvas. A janela pode ter menos amostras quando há lacunas ou a sessão é curta.
+- Na série ao vivo, o eixo mostra horários aproximados: a última amostra do primeiro pacote recebido de cada boot é ancorada à hora de chegada ao servidor, e as demais amostras usam os intervalos nominais do sensor. A âncora permanece fixa entre consultas; atrasos e envios acumulados não comprimem o sinal. Como o sensor não envia UTC de captura, horários e durações entre boots são aproximados e podem sobrepor-se quando há atraso na fila. A consulta de uma sessão específica mantém o tempo relativo. “Último recebimento” indica chegada ao servidor; o status ao vivo indica recebimento nos últimos 6 segundos.
+
+O painel consulta o SQLite real, funciona sem CDN e mostra estados de banco vazio, conexão indisponível, dados antigos e saturação. As consultas do painel são somente leitura, disponíveis na mesma rede da API, sem login, como a rota de lotes recentes existente. Opcionalmente, `CASCAVIBE_DB_PATH` define outro caminho de banco para a API inteira.
+
+A API recebe e armazena pacotes internamente, mas os limites desses pacotes não dividem a curva. Lacunas por reinício, perda de amostras ou reinicialização do sensor continuam visíveis; o painel não preenche medições ausentes. O CSV inclui o boot de cada trecho e a coluna `horario_estimado_utc` na série ao vivo.
+
+Rotas de consulta: `GET /api/v1/dashboard/timeseries?device_id=...&segundos=30` (linha temporal entre sessões), `GET /api/v1/dashboard/devices`, `GET /api/v1/dashboard/sessions?device_id=...` e `GET /api/v1/dashboard/signal?device_id=...&segundos=10` (aceita também `boot_id`). A raiz `/` mantém a resposta de status da API.
+
+Verificação do painel e regressão de ingestão, com banco temporário:
+
+```bash
+api/.venv/bin/python -m pip install -r api/requirements-dev.txt
+api/.venv/bin/python -m unittest api.test_dashboard -v
+```
+
 ## Etapa atual: acelerômetro + Wi-Fi
 
 O novo firmware está em `firmware/cascavibe_wifi/cascavibe_wifi.ino`. Ele coleta somente aceleração, oferece uma página simples para configurar Wi-Fi e envia lotes a uma API configurável. Abra `firmware/cascavibe_wifi/README.md` para gravar e conectar. O guia para você implementar sua API está em `docs/API.md`.
